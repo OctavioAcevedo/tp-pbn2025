@@ -27,6 +27,8 @@ int main(){
     printf("-> borro valor 5\n");
     eliminarNodo(&nuevo,5);
     imprimirLista(nuevo);
+    liberarLista(&nuevo);
+    printf("-> lista liberada\n");
 
     return 0;
 }
