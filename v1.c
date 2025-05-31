@@ -14,6 +14,63 @@ nodo_t* buscarNodo(nodo_t* cabeza, int dato); //Devuelve un puntero al nodo que 
 void imprimirLista(nodo_t* cabeza); //Imprime todos los elementos de la lista.  
 void liberarLista(nodo_t** cabeza); //Libera toda la memoria utilizada por la lista.
 
+int main() {
+    nodo_t* cabeza = NULL; // Se inicializa la lista vacía
+    int opcion, dato;
+
+    do {
+        printf("\n MENÚ \n");
+        printf("1. Insertar al inicio \n");
+        printf("2. Insertar al final \n");
+        printf("3. Eliminar nodo \n");
+        //printf("4. Buscar nodo \n");
+        printf("5. Imprimir lista \n");
+        printf("6. Salir \n"); // implementa liberarLista()
+        
+        scanf("%d", &opcion);
+
+        switch (opcion) {
+            case 1:
+                printf("Ingresar dato a insertar al inicio: ");
+                scanf("%d", &dato);
+                insertarAlInicio(&cabeza, dato);
+                break;
+            case 2:
+                printf("Ingresar dato a insertar al final: ");
+                scanf("%d", &dato);
+                insertarAlFinal(&cabeza, dato);
+                break;
+            case 3:
+                printf("Ingresar dato a eliminar: ");
+                scanf("%d", &dato);
+                eliminarNodo(&cabeza, dato);
+                break;
+            /*case 4:
+                printf("Ingresar dato a buscar: ");
+                scanf("%d", &dato);
+                if(buscarNodo(cabeza, dato) != NULL) {
+                    printf("El dato %d forma parte de la lista.\n", dato);
+                } else {
+                    printf("El dato %d no forma parte de la lista.\n", dato);
+                }
+                break;*/
+            case 5:
+                printf("La lista actual es: ");
+                imprimirLista(cabeza);
+                break;
+            case 6:
+                //liberarLista(&cabeza);
+                printf("Programa finalizado con éxito \n");
+                break;
+            default:
+                printf("Opción no válida. Ingresar una opción entre 1 y 6 \n");
+        }
+    } while (opcion != 6);
+
+    return 0;
+    
+}
+
 int main(){
     nodo_t * nuevo;
     nuevo = crearNodo(5);
