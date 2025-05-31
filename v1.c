@@ -17,7 +17,8 @@ void limpiarTerminal();
 
 int main() {
     nodo_t* cabeza = NULL; // Se inicializa la lista vacía
-    int opcion, dato;
+    char opcion;
+    int dato;
     limpiarTerminal();
     do {
         printf("MENÚ \n");
@@ -29,32 +30,32 @@ int main() {
         printf("6. Liberar lista \n");
         printf("7. Salir \n");
         
-        scanf("%d", &opcion);
+        scanf("%s", &opcion);
         limpiarTerminal();
 
         switch (opcion) {
-            case 1:
+            case '1':
                 limpiarTerminal();
                 printf("1. Insertar al inicio \n");
                 printf("Ingresar dato a insertar: ");
                 scanf("%d", &dato);
                 insertarAlInicio(&cabeza, dato);
                 break;
-            case 2:
+            case '2':
                 limpiarTerminal();
                 printf("2. Insertar al final \n");
                 printf("Ingresar dato a insertar: ");
                 scanf("%d", &dato);
                 insertarAlFinal(&cabeza, dato);
                 break;
-            case 3:
+            case '3':
                 limpiarTerminal();
                 printf("3. Eliminar nodo \n");
                 printf("Ingresar dato a eliminar: ");
                 scanf("%d", &dato);
                 eliminarNodo(&cabeza, dato);
                 break;
-            case 4:
+            case '4':
                 limpiarTerminal();
                 printf("4. Buscar nodo \n");
                 printf("Ingresar dato a buscar: ");
@@ -65,19 +66,19 @@ int main() {
                     printf("El dato %d no forma parte de la lista.\n", dato);
                 }
                 break;
-            case 5:
+            case '5':
                 limpiarTerminal();
                 printf("5. Imprimir lista \n");
                 printf("La lista actual es: ");
                 imprimirLista(cabeza);
                 break;
-            case 6:
+            case '6':
                 limpiarTerminal();
                 printf("6. Limpiar lista \n");
                 liberarLista(&cabeza);
                 printf("Lista liberada. \n");
                 break;
-            case 7:
+            case '7':
                 limpiarTerminal();
                 printf("7. Salir \n");
                 liberarLista(&cabeza);
@@ -196,7 +197,7 @@ void liberarLista(nodo_t** cabeza){
 
 nodo_t* buscarNodo(nodo_t* cabeza, int dato){
     nodo_t* actual = cabeza;
-    while (actual != NULL) {
+    while (actual) {
         if (actual->dato == dato) {
             return actual;
         }
