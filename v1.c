@@ -13,39 +13,51 @@ void eliminarNodo(nodo_t** cabeza, int dato); //Elimina el primer nodo que conte
 nodo_t* buscarNodo(nodo_t* cabeza, int dato); //Devuelve un puntero al nodo que contiene el dato (o NULL si no se encuentra).  
 void imprimirLista(nodo_t* cabeza); //Imprime todos los elementos de la lista.  
 void liberarLista(nodo_t** cabeza); //Libera toda la memoria utilizada por la lista.
+void limpiarTerminal();
 
 int main() {
     nodo_t* cabeza = NULL; // Se inicializa la lista vacía
     int opcion, dato;
-
+    limpiarTerminal();
     do {
-        printf("\n MENÚ \n");
+        printf("MENÚ \n");
         printf("1. Insertar al inicio \n");
         printf("2. Insertar al final \n");
         printf("3. Eliminar nodo \n");
-        //printf("4. Buscar nodo \n");
+        printf("4. Buscar nodo \n");
         printf("5. Imprimir lista \n");
         printf("6. Salir \n"); // implementa liberarLista()
         
         scanf("%d", &opcion);
+        limpiarTerminal();
 
         switch (opcion) {
             case 1:
-                printf("Ingresar dato a insertar al inicio: ");
+                limpiarTerminal();
+                printf("1. Insertar al inicio \n");
+                printf("Ingresar dato a insertar: ");
                 scanf("%d", &dato);
                 insertarAlInicio(&cabeza, dato);
                 break;
             case 2:
-                printf("Ingresar dato a insertar al final: ");
+                limpiarTerminal();
+                printf("2. Insertar al final \n");
+                printf("Ingresar dato a insertar: ");
                 scanf("%d", &dato);
                 insertarAlFinal(&cabeza, dato);
                 break;
             case 3:
+                limpiarTerminal();
+                printf("3. Eliminar nodo \n");
                 printf("Ingresar dato a eliminar: ");
                 scanf("%d", &dato);
                 eliminarNodo(&cabeza, dato);
                 break;
-            /*case 4:
+            case 4:
+                limpiarTerminal();
+                printf("4. Buscar nodo \n");
+                printf("Pendiente \n");
+                break;
                 printf("Ingresar dato a buscar: ");
                 scanf("%d", &dato);
                 if(buscarNodo(cabeza, dato) != NULL) {
@@ -53,13 +65,17 @@ int main() {
                 } else {
                     printf("El dato %d no forma parte de la lista.\n", dato);
                 }
-                break;*/
+                break;
             case 5:
+                limpiarTerminal();
+                printf("5. Imprimir lista \n");
                 printf("La lista actual es: ");
                 imprimirLista(cabeza);
                 break;
             case 6:
+                limpiarTerminal();
                 //liberarLista(&cabeza);
+                printf("6. Salir \n");
                 printf("Programa finalizado con éxito \n");
                 break;
             default:
@@ -71,52 +87,39 @@ int main() {
     
 }
 
-int main(){
-    nodo_t * nuevo;
-    nuevo = crearNodo(5);
-    printf("nuevo nodo con valor %d creado\n", nuevo->dato);
-    printf("-> inserto 6 al inicio\n");
-    insertarAlInicio(&nuevo, 6);
-    imprimirLista(nuevo);
-    printf("-> borro valor 6\n");
-    eliminarNodo(&nuevo,6);
-    imprimirLista(nuevo);
-    printf("-> borro valor 5\n");
-    eliminarNodo(&nuevo,5);
-    imprimirLista(nuevo);
-
-    return 0;
-}
+void limpiarTerminal(){
+    printf("\e[1;1H\e[2J");
+};
 
 nodo_t* crearNodo(int dato){
     nodo_t * nuevoNodo;
     nuevoNodo = (nodo_t * ) malloc(sizeof(nodo_t));
+    // por que con nodo_t * nuevaCabeza = (nodo_t * ) malloc(sizeof(nodo_t)); de una no funciona?
     nuevoNodo->dato = dato;
     nuevoNodo->next = NULL;
     return nuevoNodo;
 }
 
 void insertarAlInicio(nodo_t** cabeza, int dato){
-    nodo_t * nuevoNodo;
-    nuevoNodo = (nodo_t * ) malloc(sizeof(nodo_t));
-    // por que con nodo_t * nuevaCabeza = (nodo_t * ) malloc(sizeof(nodo_t)); de una no funciona?
-    nuevoNodo->dato = dato;
+    nodo_t * nuevoNodo = crearNodo(dato);
     nuevoNodo->next = *cabeza;
     *cabeza = nuevoNodo;
 }
 
 void insertarAlFinal(nodo_t** cabeza, int dato){
-    nodo_t * nuevoNodo;
+    nodo_t * nuevoNodo = crearNodo(dato);
     nodo_t * actual = (*cabeza);
-
-    nuevoNodo = (nodo_t * ) malloc(sizeof(nodo_t));
-    nuevoNodo->dato = dato;
     
+    if (!actual){
+        *cabeza = nuevoNodo;
+        return;
+    }
     while(actual->next != NULL){
         actual = actual->next;
     }
     
     actual->next = nuevoNodo;
+    return;
 }
 
 void eliminarNodo(nodo_t** cabeza, int dato){
@@ -126,52 +129,52 @@ void eliminarNodo(nodo_t** cabeza, int dato){
     int valorRetorno;
     int i = 0;
 
-    
-    if (actual->dato == dato){
-        //hace falta nullear el ->dato?
-        if (actual->next){
-            siguiente = actual->next;
-            free(actual);
-            actual = NULL;
-            *cabeza = siguiente;
-        }else{
-            free(*cabeza);
-            *cabeza = NULL;
-        }
-        return;
-    }
-
-    while(actual){
-        anterior = actual;
-        actual = actual->next;
-        siguiente = actual->next;
-
+    if (actual){
         if (actual->dato == dato){
-            anterior->next = siguiente;
-            free(actual);
-            actual = NULL;
+            //hace falta nullear el ->dato?
+            if (actual->next){
+                siguiente = actual->next;
+                free(actual);
+                actual = NULL;
+                *cabeza = siguiente;
+            }else{
+                free(*cabeza);
+                *cabeza = NULL;
+            }
+            printf("Nodo eliminado!\n");
             return;
         }
-        actual = actual->next;
+
+        while(actual->next){
+            if(actual->next->dato == dato){
+                anterior = actual;
+                actual = actual->next;
+                siguiente = actual->next;
+                anterior->next = siguiente;
+                free(actual);
+                actual = NULL;
+                printf("Nodo eliminado!\n");
+                return;
+            }
+            actual = actual->next;
+        }
     }
+    printf("Dato no encontrado!\n");
 };
 
 void imprimirLista(nodo_t* cabeza){
     nodo_t * actual = cabeza;
-    int i = 0;
 
-    if (!actual){
-        printf("La lista está vacia!\n");
-    }
-
+    printf("[");
     while(actual){
-        printf("elemento %d: %d\n",i,actual->dato);
-        i++;
+        printf("%d",actual->dato);
         if (actual->next == NULL){
             break;
         }
+        printf(", ");
         actual = actual->next;
     }
+    printf("]\n");
 };
 
 
