@@ -177,5 +177,14 @@ void imprimirLista(nodo_t* cabeza){
     printf("]\n");
 };
 
+void liberarLista(nodo_t** cabeza){
+    nodo_t * actual = *cabeza;
+    nodo_t * siguiente;
 
-
+    while(actual){
+        siguiente = actual->next;
+        free(actual);
+        actual = siguiente;
+    }
+    *cabeza = NULL;
+}
