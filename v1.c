@@ -26,7 +26,8 @@ int main() {
         printf("3. Eliminar nodo \n");
         printf("4. Buscar nodo \n");
         printf("5. Imprimir lista \n");
-        printf("6. Salir \n"); // implementa liberarLista()
+        printf("6. Liberar lista \n");
+        printf("7. Salir \n");
         
         scanf("%d", &opcion);
         limpiarTerminal();
@@ -56,8 +57,6 @@ int main() {
             case 4:
                 limpiarTerminal();
                 printf("4. Buscar nodo \n");
-                printf("Pendiente \n");
-                break;
                 printf("Ingresar dato a buscar: ");
                 scanf("%d", &dato);
                 if(buscarNodo(cabeza, dato) != NULL) {
@@ -74,14 +73,20 @@ int main() {
                 break;
             case 6:
                 limpiarTerminal();
-                //liberarLista(&cabeza);
-                printf("6. Salir \n");
-                printf("Programa finalizado con éxito \n");
+                printf("6. Limpiar lista \n");
+                liberarLista(&cabeza);
+                printf("Lista liberada. \n");
                 break;
+            case 7:
+                limpiarTerminal();
+                printf("7. Salir \n");
+                liberarLista(&cabeza);
+                printf("Programa finalizado con éxito \n");
+                break;   
             default:
-                printf("Opción no válida. Ingresar una opción entre 1 y 6 \n");
+                printf("Opción no válida. Ingresar una opción entre 1 y 7 \n");
         }
-    } while (opcion != 6);
+    } while (opcion != 7);
 
     return 0;
     
@@ -159,7 +164,7 @@ void eliminarNodo(nodo_t** cabeza, int dato){
             actual = actual->next;
         }
     }
-    printf("Dato no encontrado!\n");
+    printf("El dato %d no forma parte de la lista.\n", dato);
 };
 
 void imprimirLista(nodo_t* cabeza){
@@ -187,4 +192,15 @@ void liberarLista(nodo_t** cabeza){
         actual = siguiente;
     }
     *cabeza = NULL;
+}
+
+nodo_t* buscarNodo(nodo_t* cabeza, int dato){
+    nodo_t* actual = cabeza;
+    while (actual != NULL) {
+        if (actual->dato == dato) {
+            return actual;
+        }
+        actual = actual->next;
+    }
+    return NULL;
 }
