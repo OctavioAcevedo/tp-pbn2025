@@ -37,11 +37,15 @@ Materia *materia1 = NULL;
 
 void altaEstudiante(char *nombre, char *apellido, int edad);
 void altaMateria(char *nombre);
+void eliminarMateria(char *nombreMateria);
 void inscribirMateria(int legajo, char *nombreMateria);
 Estudiante *buscarPorLegajo(int legajo);
 Materia *buscarMateria(char *nombreMateria);
+Inscripcion *buscarInscripcion(int legajo, char *nombreMateria);
 void listarMateriasPorEstudiante(int legajo);
 void listarEstudiantesPorMateria(char *nombreMateria);
+void rendirMateria(int legajo, char *nombreMateria, int nota);
+void darDeBajaMateria(int legajo, char *nombreMateria);
 
 int main()
 {
@@ -67,10 +71,21 @@ int main()
     inscribirMateria(1, "Diseño Lógico");
     inscribirMateria(2, "Programación bajo nivel");
 
-    while(legajo1){
+    rendirMateria(1, "AyP I", 8);
+    rendirMateria(2, "AyP I", 7);
+
+    darDeBajaMateria(1, "Analisis Matematico I");
+    darDeBajaMateria(2, "AyP I");
+
+    while (legajo1)
+    {
         listarMateriasPorEstudiante(legajo1->legajo);
         legajo1 = legajo1->next;
     }
+
+    // Espera un input para que el usuario pueda ver los resultados antes de cerrar la consola
+    printf("Presione Enter para continuar...\n");
+    getchar();
     return 0;
 }
 
@@ -181,7 +196,7 @@ void altaMateria(char *nombre)
     }
 }
 
-//cambiar por busqueda binaria o alguna otra mas performante (los legajos estan ordenados)
+// cambiar por busqueda binaria o alguna otra mas performante (los legajos estan ordenados)
 Estudiante *buscarPorLegajo(int legajo)
 {
     Estudiante *actual = legajo1;
@@ -215,6 +230,27 @@ Materia *buscarMateria(char *nombreMateria)
     printf("No se encontro la materia %s\n", nombreMateria);
     return NULL;
 };
+
+Inscripcion *buscarInscripcion(int legajo, char *nombreMateria)
+{
+    Estudiante *estudiante = buscarPorLegajo(legajo);
+    Materia *materia = buscarMateria(nombreMateria);
+    if (estudiante && materia)
+    {
+        Inscripcion *inscripcion = estudiante->inscripcionesHead;
+        while (inscripcion)
+        {
+            if (inscripcion->materia == materia)
+            {
+                return inscripcion;
+            }
+            inscripcion = inscripcion->nextMateria;
+        }
+    }
+    // Si no se encontró la inscripción
+    printf("El estudiante con legajo %d no está inscripto en la materia %s.\n", legajo, nombreMateria);
+    return NULL;
+}
 
 void listarMateriasPorEstudiante(int legajo)
 {
@@ -259,7 +295,6 @@ void eliminarMateria(char *nombreMateria)
 
     if (materiaAEliminar == NULL)
     {
-        printf("La materia '%s' no existe.\n", nombreMateria);
         return;
     }
 
@@ -267,84 +302,67 @@ void eliminarMateria(char *nombreMateria)
     // Se recorren todas las inscripciones para eliminarlas
     while (inscripcionActual != NULL)
     {
-	// Se guarda la inscripción siguiente para liberar la actual
         Inscripcion *siguienteInscripcion = inscripcionActual->nextEstudiante;
-	Estudiante *estudianteInscrito = inscripcionActual->estudiante;
-	// enlaces y desenlaces de las inscripciones del estudiante
-	if (inscripcionActual->prevMateria != NULL)
-	{
-	inscripcionActual->prevMateria->nextMateria = inscripcionActual->nextMateria;
-	}
-        else
-	{
-	// actualización del head para la primera inscripción del estudiante
-            estudianteInscrito->inscripcionesHead = inscripcionActual->nextMateria;
-	}
-        if (inscripcionActual->nextMateria != NULL)
-	{
-            inscripcionActual->nextMateria->prevMateria = inscripcionActual->prevMateria;
-	}
-	// enlaces y desenlaces de las inscripciones de la materia
-        if (inscripcionActual->prevEstudiante != NULL)
-	{
-            inscripcionActual->prevEstudiante->nextEstudiante = inscripcionActual->nextEstudiante;
-	}
-        else
-	{
-	// actualización del head para la primera inscripción de la materia
-            materiaAEliminar->inscripcionesHead = inscripcionActual->nextEstudiante;
-	}
-        if (inscripcionActual->nextEstudiante != NULL)
-	{
-            inscripcionActual->nextEstudiante->prevEstudiante = inscripcionActual->prevEstudiante;
-	}
-        printf("Se eliminó la inscripción de %s para el estudiante con legajo %d .\n", materiaAEliminar->nombre, estudianteInscrito->legajo);
+        Estudiante *estudianteInscrito = inscripcionActual->estudiante;
 
-        free(inscripcionActual);
-	// se avanza a la inscripción siguiente
+        // Reemplazo: usar darDeBajaMateria en vez de los ifs manuales
+        darDeBajaMateria(estudianteInscrito->legajo, nombreMateria);
+
+        // Ya no se hace free aquí, lo hace darDeBajaMateria
         inscripcionActual = siguienteInscripcion;
-
     }
-	// enlaces y desenlaces de la lista general de materias para eliminarla
-	if (materiaAEliminar->prev != NULL)
-	{
-            materiaAEliminar->prev->next = materiaAEliminar->next;
-	}
-	else
-	{
-	// actualización del head para la primera materia a eliminar de la lista general
-            materia1 = materiaAEliminar->next;
-	}
-	if (materiaAEliminar->next != NULL)
-	{
-            materiaAEliminar->next->prev = materiaAEliminar->prev;
-	}
+    // enlaces y desenlaces de la lista general de materias para eliminarla
+    if (materiaAEliminar->prev != NULL)
+    {
+        materiaAEliminar->prev->next = materiaAEliminar->next;
+    }
+    else
+    {
+        // actualización del head para la primera materia a eliminar de la lista general
+        materia1 = materiaAEliminar->next;
+    }
+    if (materiaAEliminar->next != NULL)
+    {
+        materiaAEliminar->next->prev = materiaAEliminar->prev;
+    }
 
-	free(materiaAEliminar);
-	printf("Se eliminó la materia '%s'.\n", nombreMateria);
+    free(materiaAEliminar);
+    printf("Se eliminó la materia '%s'.\n", nombreMateria);
 }
 
 void rendirMateria(int legajo, char *nombreMateria, int nota)
 {
-    Estudiante *estudiante = buscarPorLegajo(legajo);
-    if (estudiante == NULL)
-    {
-        printf("El estudiante con legajo %d no existe.\n", legajo);
+    Inscripcion *inscripcion = buscarInscripcion(legajo, nombreMateria);
+    if (!inscripcion)
         return;
-    }
 
-    Inscripcion *actual = estudiante->inscripcionesHead;
+    inscripcion->nota = nota;
+    printf("El estudiante %s, tiene nota %d en la materia %s.\n",
+           inscripcion->estudiante->nombre, nota, nombreMateria);
+}
 
-    while (actual != NULL)
-    {
-        if (strcmp(actual->materia->nombre, nombreMateria) == 0) // comparación con diferentes longitudes
-        {
-            actual->nota = nota;
-            printf("El estudiante %s, tiene nota %d en la materia %s.\n", estudiante->nombre, nota, nombreMateria);
-            return;
-        }
-        actual = actual->nextMateria;
-    }
+void darDeBajaMateria(int legajo, char *nombreMateria)
+{
+    Inscripcion *inscripcion = buscarInscripcion(legajo, nombreMateria);
+    if (!inscripcion)
+        return;
 
-    printf("No se encontró la inscripción en la materia %s.\n", nombreMateria);
+    // Elimina de la lista de inscripciones del estudiante
+    if (inscripcion->prevMateria)
+        inscripcion->prevMateria->nextMateria = inscripcion->nextMateria;
+    else
+        inscripcion->estudiante->inscripcionesHead = inscripcion->nextMateria;
+    if (inscripcion->nextMateria)
+        inscripcion->nextMateria->prevMateria = inscripcion->prevMateria;
+
+    // Elimina de la lista de inscripciones de la materia
+    if (inscripcion->prevEstudiante)
+        inscripcion->prevEstudiante->nextEstudiante = inscripcion->nextEstudiante;
+    else
+        inscripcion->materia->inscripcionesHead = inscripcion->nextEstudiante;
+    if (inscripcion->nextEstudiante)
+        inscripcion->nextEstudiante->prevEstudiante = inscripcion->prevEstudiante;
+
+    printf("Se eliminó la inscripción de %s para el estudiante con legajo %d.\n", nombreMateria, legajo);
+    free(inscripcion);
 }
