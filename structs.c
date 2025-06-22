@@ -43,6 +43,7 @@ void listarEstudiantes();
 void modificarEstudiante(int legajo, char *nombre, char *apellido, int edad);
 void listarPorNombreApellido(char *nombreApellido);
 void listarPorEdad(int edadMin, int edadMax);
+void eliminarEstudiante(int legajo);
 Estudiante *buscarPorLegajo(int legajo);
 
 //Materias
@@ -58,7 +59,7 @@ Inscripcion *buscarInscripcion(int legajo, char *nombreMateria);
 void listarMateriasPorEstudiante(int legajo);
 void listarEstudiantesPorMateria(char *nombreMateria);
 void rendirMateria(int legajo, char *nombreMateria, int nota);
-void darDeBajaMateria(int legajo, char *nombreMateria);
+void darDeBajaMateria(int legajo, char *nombreMateria, Inscripcion *inscripcionInput);
 
 int main()
 {
@@ -87,14 +88,16 @@ int main()
     rendirMateria(1, "AyP I", 8);
     rendirMateria(2, "AyP I", 7);
 
-    darDeBajaMateria(1, "Analisis Matematico I");
-    darDeBajaMateria(2, "AyP I");
+    listarEstudiantes();
+    listarEstudiantesPorMateria("Diseño Lógico");
+    listarMateriasPorEstudiante(legajo1->legajo);
 
-    while (legajo1)
-    {
-        listarMateriasPorEstudiante(legajo1->legajo);
-        legajo1 = legajo1->next;
-    }
+    eliminarEstudiante(1);
+
+    listarEstudiantes();
+    listarEstudiantesPorMateria("Diseño Lógico");
+    listarMateriasPorEstudiante(legajo1->legajo);
+
 
     // Espera un input para que el usuario pueda ver los resultados antes de cerrar la consola
     printf("Presione Enter para continuar...\n");
@@ -200,6 +203,44 @@ void listarPorEdad(int edadMin, int edadMax)
         printf("No se encontraron estudiantes dentro del rango de edad %d - %d\n", edadMin, edadMax);
     }
 }
+
+void eliminarEstudiante(int legajo)
+{
+    Estudiante *estudianteAEliminar = buscarPorLegajo(legajo);
+
+    if (estudianteAEliminar == NULL)
+    {
+        return;
+    }
+
+    Inscripcion *inscripcionActual = estudianteAEliminar->inscripcionesHead;
+    // Se recorren todas las inscripciones del estudiante para eliminarlas
+    while (inscripcionActual != NULL)
+    {
+        Inscripcion *siguienteInscripcion = inscripcionActual->nextMateria;
+
+        darDeBajaMateria(legajo,inscripcionActual->materia->nombre,inscripcionActual);
+
+        inscripcionActual = siguienteInscripcion;
+    }
+    // enlaces y desenlaces de la lista general de estudiantes para eliminarlo
+    if (estudianteAEliminar->prev != NULL)
+    {
+        estudianteAEliminar->prev->next = estudianteAEliminar->next;
+    }
+    else
+    {
+        // actualización del head para la primera materia a eliminar de la lista general
+        legajo1 = estudianteAEliminar->next;
+    }
+    if (estudianteAEliminar->next != NULL)
+    {
+        estudianteAEliminar->next->prev = estudianteAEliminar->prev;
+    }
+
+    free(estudianteAEliminar);
+    printf("Se eliminó el estudiante legajo %d.\n", legajo);
+}
 // cambiar por busqueda binaria o alguna otra mas performante (los legajos estan ordenados)
 Estudiante *buscarPorLegajo(int legajo)
 {
@@ -280,12 +321,9 @@ void eliminarMateria(char *nombreMateria)
     while (inscripcionActual != NULL)
     {
         Inscripcion *siguienteInscripcion = inscripcionActual->nextEstudiante;
-        Estudiante *estudianteInscrito = inscripcionActual->estudiante;
 
-        // Reemplazo: usar darDeBajaMateria en vez de los ifs manuales
-        darDeBajaMateria(estudianteInscrito->legajo, nombreMateria);
+        darDeBajaMateria(-1,NULL,inscripcionActual);
 
-        // Ya no se hace free aquí, lo hace darDeBajaMateria
         inscripcionActual = siguienteInscripcion;
     }
     // enlaces y desenlaces de la lista general de materias para eliminarla
@@ -442,9 +480,15 @@ void rendirMateria(int legajo, char *nombreMateria, int nota)
            inscripcion->estudiante->nombre, nota, nombreMateria);
 }
 
-void darDeBajaMateria(int legajo, char *nombreMateria)
+void darDeBajaMateria(int legajo, char *nombreMateria, Inscripcion *inscripcionInput)
 {
-    Inscripcion *inscripcion = buscarInscripcion(legajo, nombreMateria);
+    Inscripcion *inscripcion = malloc(sizeof(Inscripcion));
+
+    if(inscripcionInput)
+        inscripcion = inscripcionInput;
+    else  
+        inscripcion = buscarInscripcion(legajo, nombreMateria);
+
     if (!inscripcion)
         return;
 
