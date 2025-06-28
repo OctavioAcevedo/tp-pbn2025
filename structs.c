@@ -35,11 +35,15 @@ typedef struct inscripcion
 Estudiante *legajo1 = NULL;
 Materia *materia1 = NULL;
 
+int cantidadEstudiantes = 0;
+int cantidadMaterias = 0;
+int cantidadMateriasListadas = 0;
+
 void limpiarTerminal();
 
 //Estudiantes
 void altaEstudiante(char *nombre, char *apellido, int edad);
-void listarEstudiantes();
+Estudiante *listarEstudiantes();
 void modificarEstudiante(int legajo, char *nombre, char *apellido, int edad);
 void listarPorNombreApellido(char *nombreApellido);
 void listarPorEdad(int edadMin, int edadMax);
@@ -56,11 +60,11 @@ Materia *buscarMateria(char *nombreMateria);
 //Inscripciones
 void inscribirMateria(int legajo, char *nombreMateria);
 Inscripcion *buscarInscripcion(int legajo, char *nombreMateria);
-void listarMateriasPorEstudiante(int legajo);
+Inscripcion *listarMateriasPorEstudiante(int legajo);
 void listarEstudiantesPorMateria(char *nombreMateria);
 void rendirMateria(int legajo, char *nombreMateria, int nota);
 void darDeBajaMateria(int legajo, char *nombreMateria, Inscripcion *inscripcionInput);
-
+/*
 int main()
 {
     altaEstudiante("Juan", "Perez", 20);
@@ -104,6 +108,7 @@ int main()
     getchar();
     return 0;
 }
+    */
 
 void altaEstudiante(char *nombre, char *apellido, int edad)
 {
@@ -134,16 +139,29 @@ void altaEstudiante(char *nombre, char *apellido, int edad)
         nuevo->prev = actual;
         nuevo->legajo = actual->legajo + 1;
     }
+    cantidadEstudiantes++;
 }
 
-void listarEstudiantes()
+Estudiante* listarEstudiantes()
 {
+    int i = 0;
+    Estudiante* arrayRet = malloc(cantidadEstudiantes * sizeof(Estudiante));
+
     Estudiante *actual = legajo1;
     while (actual)
     {
         printf("Legajo: %d, Nombre: %s %s, Edad: %d\n", actual->legajo, actual->nombre, actual->apellido, actual->edad);
+        arrayRet[i] = *actual;
         actual = actual->next;
+        i++;
     }
+
+    return arrayRet;
+}
+
+int cantidadDeEstudiantes()
+{
+    return cantidadEstudiantes;
 }
 
 void modificarEstudiante(int legajo, char *nombre, char *apellido, int edad)
@@ -239,6 +257,7 @@ void eliminarEstudiante(int legajo)
     }
 
     free(estudianteAEliminar);
+    cantidadEstudiantes--;
     printf("Se eliminó el estudiante legajo %d.\n", legajo);
 }
 // cambiar por busqueda binaria o alguna otra mas performante (los legajos estan ordenados)
@@ -286,6 +305,7 @@ void altaMateria(char *nombre)
         actual->next = nuevaMateria;
         nuevaMateria->prev = actual;
     }
+    cantidadMaterias++;
 }
 
 void listarMaterias()
@@ -342,6 +362,7 @@ void eliminarMateria(char *nombreMateria)
     }
 
     free(materiaAEliminar);
+    cantidadMaterias--;
     printf("Se eliminó la materia '%s'.\n", nombreMateria);
 }
 
@@ -432,11 +453,21 @@ void inscribirMateria(int legajo, char *nombreMateria)
     }
 }
 
-void listarMateriasPorEstudiante(int legajo)
+int cantidadDeMateriasListadas()
 {
+    return cantidadMateriasListadas;
+}
+
+Inscripcion* listarMateriasPorEstudiante(int legajo)
+{
+    Inscripcion* arrayRet = malloc(cantidadEstudiantes * sizeof(Inscripcion));
+    cantidadMateriasListadas = 0;
+
     Estudiante *estudiante = buscarPorLegajo(legajo);
     if (estudiante)
     {
+        int i = 0;
+
         Inscripcion *actual = estudiante->inscripcionesHead;
         printf("Materias inscriptas por el estudiante %s %s (Legajo: %d):\n", estudiante->nombre, estudiante->apellido, estudiante->legajo);
         while (actual)
@@ -449,8 +480,13 @@ void listarMateriasPorEstudiante(int legajo)
             {
                 printf("- %s - calificación: %i\n", actual->materia->nombre, actual->nota);
             }
+
+            arrayRet[i] = *actual;
+            i++;
             actual = actual->nextMateria;
+            cantidadMateriasListadas++;
         }
+        return arrayRet;
     }
 }
 
@@ -511,3 +547,7 @@ void darDeBajaMateria(int legajo, char *nombreMateria, Inscripcion *inscripcionI
     printf("Se eliminó la inscripción de %s para el estudiante con legajo %d.\n", nombreMateria, legajo);
     free(inscripcion);
 }
+
+void limpiarTerminal(){
+    printf("\e[1;1H\e[2J");
+};
