@@ -50,11 +50,13 @@ Este archivo contiene la lógica y las estructuras de datos principales del gest
   - Listar estudiantes por rango de edad.
 
 
-# Interfaz de Menú (`menu.c`)
+## Funcionalidades Extra
+### Caluclo de promedios
+Se implementó la funcion `promedioEstudiante()` para caluclar el promedio de calficiaciones de las inscripciones de un estudiante
+
+### Interfaz de Menú (`menu.c`)
 
 Este archivo implementa la interfaz de usuario en consola para un gestor académico de estudiantes y materias, utilizando la biblioteca ncurses (PDCurses en Windows).
-
-## Funcionalidad principal
 
 - **Menú principal:** Permite elegir entre modo Estudiante, Administrador o salir del programa.
 - **Gestión de estudiantes:**
@@ -70,7 +72,7 @@ Este archivo implementa la interfaz de usuario en consola para un gestor académ
 - **Navegación:** El usuario navega por los menús usando las flechas del teclado y selecciona opciones con Enter.
 - **Interfaz interactiva:** Los menús y formularios se muestran en pantalla y se actualizan dinámicamente según la interacción del usuario.
 
-## Notas
+> Notas
 
 - El archivo depende de las funciones de manejo de datos definidas en `structs.c` para la lógica de estudiantes, materias e inscripciones.
 
