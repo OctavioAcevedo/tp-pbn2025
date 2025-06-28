@@ -35,7 +35,10 @@ typedef struct inscripcion
 Estudiante *legajo1 = NULL;
 Materia *materia1 = NULL;
 
+
 void limpiarTerminal();
+float promedioEstudiante(int legajo);
+void mostrarpromedios();
 
 //Estudiantes
 void altaEstudiante(char *nombre, char *apellido, int edad);
@@ -85,8 +88,13 @@ int main()
     inscribirMateria(1, "Diseño Lógico");
     inscribirMateria(2, "Programación bajo nivel");
 
-    rendirMateria(1, "AyP I", 8);
-    rendirMateria(2, "AyP I", 7);
+    rendirMateria(1, "AyP I", 8); 
+    rendirMateria(2, "AyP II", 7);
+    rendirMateria(2, "Analisis Matematico I", 4);
+    rendirMateria(2, "Programación bajo nivel", 9);
+    rendirMateria(3, "AyP I", 6);
+    rendirMateria(3, "Programación bajo nivel", 7);
+    printf("Promedio del estudiante 2: %.2f\n", promedioEstudiante(2));
 
     listarEstudiantes();
     listarEstudiantesPorMateria("Diseño Lógico");
@@ -97,7 +105,7 @@ int main()
     listarEstudiantes();
     listarEstudiantesPorMateria("Diseño Lógico");
     listarMateriasPorEstudiante(legajo1->legajo);
-
+    mostrarpromedios();
 
     // Espera un input para que el usuario pueda ver los resultados antes de cerrar la consola
     printf("Presione Enter para continuar...\n");
@@ -511,3 +519,49 @@ void darDeBajaMateria(int legajo, char *nombreMateria, Inscripcion *inscripcionI
     printf("Se eliminó la inscripción de %s para el estudiante con legajo %d.\n", nombreMateria, legajo);
     free(inscripcion);
 }
+float promedioEstudiante(int legajo)
+{   Estudiante *estudiante = buscarPorLegajo(legajo);
+    if(estudiante == NULL)
+    {
+        printf("no se encontro el estudiante con legajo %d\n", legajo);
+        return 0.0; 
+    }
+    Inscripcion *inscripcion = estudiante->inscripcionesHead;
+    if(inscripcion == NULL)
+    {
+        printf("El estudiante con legajo %d no tiene inscripciones.\n", legajo);
+        return 0.0;
+    }
+    float sumarNotas =0.0;
+    int cantidadInscripciones = 0;
+    while(inscripcion)
+    {
+        if(inscripcion->nota>0.0){
+            sumarNotas+= inscripcion->nota;
+            cantidadInscripciones++;
+        }
+        inscripcion= inscripcion->nextMateria;
+    }
+        if (cantidadInscripciones == 0) {
+        printf("El estudiante con legajo %d no tiene notas cargadas.\n", legajo);
+        return -1.0;
+    }
+    return sumarNotas/(float)cantidadInscripciones;
+
+}
+void mostrarpromedios()
+{
+    Estudiante *actual = legajo1;
+
+     if (!actual) {
+        printf("No hay estudiantes cargados.\n");
+        return;
+    }
+    while (actual)
+    {
+        float promedio = promedioEstudiante(actual->legajo);
+        printf("Legajo: %d, Nombre: %s %s, Promedio: %.2f\n", actual->legajo, actual->nombre, actual->apellido, promedio);
+        actual = actual->next;
+    }
+}
+
