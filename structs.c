@@ -36,6 +36,7 @@ Estudiante *legajo1 = NULL;
 Materia *materia1 = NULL;
 
 int cantidadEstudiantes = 0;
+int cantidadEstudiantesListados = 0;
 int cantidadMaterias = 0;
 int cantidadMateriasListadas = 0;
 
@@ -54,19 +55,22 @@ Estudiante *buscarPorLegajo(int legajo);
 
 //Materias
 void altaMateria(char *nombre);
-void listarMaterias();
+Materia* listarMaterias();
 void modificarMateria(char *nombre, char *nuevoNombre);
 void eliminarMateria(char *nombreMateria);
 Materia *buscarMateria(char *nombreMateria);
 
 //Inscripciones
 void inscribirMateria(int legajo, char *nombreMateria);
-Inscripcion *buscarInscripcion(int legajo, char *nombreMateria);
 Inscripcion *listarMateriasPorEstudiante(int legajo);
-void listarEstudiantesPorMateria(char *nombreMateria);
+Inscripcion* listarEstudiantesPorMateria(char *nombreMateria);
 void rendirMateria(int legajo, char *nombreMateria, int nota);
 void darDeBajaMateria(int legajo, char *nombreMateria, Inscripcion *inscripcionInput);
-/*
+Inscripcion *buscarInscripcion(int legajo, char *nombreMateria);
+
+/* -- se comenta este main para que se use el del menu
+   -- no se borra para conservar las pruebas
+
 int main()
 {
     altaEstudiante("Juan", "Perez", 20);
@@ -159,10 +163,9 @@ Estudiante* listarEstudiantes()
     {
         printf("Legajo: %d, Nombre: %s %s, Edad: %d\n", actual->legajo, actual->nombre, actual->apellido, actual->edad);
         arrayRet[i] = *actual;
-        actual = actual->next;
         i++;
+        actual = actual->next;
     }
-
     return arrayRet;
 }
 
@@ -315,14 +318,25 @@ void altaMateria(char *nombre)
     cantidadMaterias++;
 }
 
-void listarMaterias()
+Materia* listarMaterias()
 {
+    int i = 0;
+    Materia* arrayRet = malloc(cantidadMaterias * sizeof(Materia));
+
     Materia *actual = materia1;
     while (actual)
     {
         printf("Materia: %s\n", actual->nombre);
+        arrayRet[i] = *actual;
+        i++;
         actual = actual->next;
     }
+    return arrayRet;
+}
+
+int cantidadDeMaterias()
+{
+    return cantidadMaterias;
 }
 
 void modificarMateria(char *nombre, char *nuevoNombre)
@@ -490,25 +504,40 @@ Inscripcion* listarMateriasPorEstudiante(int legajo)
 
             arrayRet[i] = *actual;
             i++;
-            actual = actual->nextMateria;
             cantidadMateriasListadas++;
+            actual = actual->nextMateria;
         }
         return arrayRet;
     }
 }
 
-void listarEstudiantesPorMateria(char *nombreMateria)
+int cantidadDeEstudiantesListados()
 {
+    return cantidadEstudiantesListados;
+}
+
+Inscripcion* listarEstudiantesPorMateria(char *nombreMateria)
+{
+    Inscripcion* arrayRet = malloc(cantidadEstudiantes * sizeof(Inscripcion));
+    cantidadEstudiantesListados = 0;
+
     Materia *materia = buscarMateria(nombreMateria);
     if (materia)
     {
+        int i = 0;
+
         Inscripcion *actual = materia->inscripcionesHead;
         printf("Estudiantes inscriptos en la materia %s:\n", materia->nombre);
         while (actual)
         {
             printf("- %s %s (Legajo: %d) - calificación: %i\n", actual->estudiante->nombre, actual->estudiante->apellido, actual->estudiante->legajo, actual->nota);
+            
+            arrayRet[i] = *actual;
+            i++;
+            cantidadEstudiantesListados++;
             actual = actual->nextEstudiante;
         }
+        return arrayRet;
     }
 }
 

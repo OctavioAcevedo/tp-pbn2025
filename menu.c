@@ -1,27 +1,21 @@
 #include "structs.c"
 #include <curses.h>
 
-/* compilar: gcc menu.c -I .\PDCurses\ -L .\PDCurses\wincon\ -l:pdcurses.a -g -o menu.exe
-*/
+// compilar: gcc menu.c -I .\PDCurses\ -L .\PDCurses\wincon\ -l:pdcurses.a -g -o menu.exe
 
-/* vulnerabilidad: no se valida la entrada del usuario, se puede ingresar cualquier cosa sin respetar el tipo de dato esperado
-*/
 
-/* comentario: no funcan los caracteres especiales (ñ o tildes)
-*/
-
-/*comentario: en la modificacion de estudiante o materia, al volver al detalle de la entidad no se
-ven aplicados los cambios ya que los mostrados son una variable auxiliar, los cambios se ven cuando se vuelve al listado
-*/
-const char *items[] = {"Nodo 1", "Nodo 2", "Nodo 3", "Salir"};
-#define NUM_ITEMS (sizeof(items) / sizeof(items[0]))
-
-void menuAdministrador();
+void menu();
 void vistaListadoDeEstudiantes();
 void vistaNuevoEstudiante();
 void vistaDetalleEstudiante(Estudiante *estudiante);
 void vistaListadoMateriasPorEstudiante(Estudiante *estudiante);
 void vistaModificarEstudiante(Estudiante *estudiante);
+void vistaListadoDeMaterias();
+void vistaNuevaMateria();
+void vistaDetalleMateria(Materia *materia);
+void vistaModificarMateria(Materia *materia);
+void vistaListadoEstudiantesPorMateria(Materia *materia);
+
 int menu2Opciones(int opcionPosY, char *titulo, char *opcion1, char *opcion2);
 int menu3Opciones(int opcionPosY, char *titulo, char *opcion1, char *opcion2, char *opcion3);
 
@@ -36,17 +30,17 @@ void cargarDatos()
     altaMateria("AyP I");
     altaMateria("AyP II");
     altaMateria("Programacion bajo nivel");
-    altaMateria("Diseño Logico");
+    altaMateria("Estructura de Datos");
 
     inscribirMateria(1, "Analisis Matematico I");
     inscribirMateria(1, "AyP I");
     inscribirMateria(2, "AyP II");
     inscribirMateria(3, "Programacion bajo nivel");
-    inscribirMateria(4, "Diseño Logico");
+    inscribirMateria(4, "Estructura de Datos");
     inscribirMateria(2, "Analisis Matematico I");
     inscribirMateria(3, "AyP I");
     inscribirMateria(4, "AyP II");
-    inscribirMateria(1, "Diseño Logico");
+    inscribirMateria(1, "Estructura de Datos");
     inscribirMateria(2, "Programacion bajo nivel");
 }
 
@@ -60,86 +54,14 @@ int main()
     keypad(stdscr, TRUE); // Habilitar teclas especiales
     curs_set(0);          // Ocultar el cursor
 
-    const char *opcionesMenu1[] = {"Estudiante", "Administrador", "Salir"};
-    int cantMenuPrincipal = 3;
-
-    int choice = 0;
-    int ch;
-
-    while (1)
-    {
-        clear();
-        mvprintw(0, 0, "Bienvenido al gestor estudiantes!");
-
-        int opcionPosY = 2;
-
-        for (int i = 0; i < cantMenuPrincipal; i++)
-        {
-            if (i == cantMenuPrincipal - 1)
-                opcionPosY += 2;
-            else
-                opcionPosY++;
-
-            if (i == choice)
-            {
-                attron(A_REVERSE); // Resaltar selección
-                mvprintw(opcionPosY, 2, "%s", opcionesMenu1[i]);
-                attroff(A_REVERSE);
-            }
-            else
-            {
-                mvprintw(opcionPosY, 2, "%s", opcionesMenu1[i]);
-            }
-        }
-
-        ch = getch();
-        switch (ch)
-        {
-        case KEY_UP:
-            choice--;
-            if (choice < 0)
-                choice = cantMenuPrincipal - 1;
-            break;
-        case KEY_DOWN:
-            choice++;
-            if (choice >= cantMenuPrincipal)
-                choice = 0;
-            break;
-        case 10: // Enter
-            if (choice == 1)
-            {                        // "Administrador"
-                menuAdministrador(); // Llamar al menu de administrador
-            }
-            else if (choice == cantMenuPrincipal - 1)
-            { // "Salir"
-                int opcionSalir = menu2Opciones(10, "Salir del programa?", "Si, salir", "No, volver al menu");
-                if (opcionSalir == 0)
-                {
-                    endwin();
-                    return 0;
-                }
-                else
-                    break;
-            }
-            else
-            {
-                // Aquí puedes ejecutar una acción sobre el nodo seleccionado
-                mvprintw(10, 2, "Seleccionaste %s", opcionesMenu1[choice]);
-                refresh();
-                getch(); // Esperar tecla para continuar
-            }
-            break;
-        }
-    }
-
-    endwin(); // Restaurar terminal
+    menu();
     return 0;
 }
 
-void menuAdministrador()
+void menu()
 {
 
-    const char *opcionesMenuAdmin[] = {"Materias->", "Estudiantes ->", "<- Atras"};
+    const char *opcionesMenuAdmin[] = {"Materias->", "Estudiantes ->", "[<- Salir"};
     const int cantOpciones = 3;
 
     int choice = 0;
@@ -148,7 +70,7 @@ void menuAdministrador()
     while (1)
     {
         clear();
-        mvprintw(0, 0, "MENU ADMINISTRADOR - Seleccione una opción:");
+        mvprintw(0, 0, "Bienvenido al GESTOR ACADEMICO - presiona Enter para seleccionar una opcion");
 
         int posY = 1;
         int posX = 2;
@@ -189,19 +111,30 @@ void menuAdministrador()
                 choice = 0;
             break;
         case 10: // Enter
-            if (choice == cantOpciones - 1)
-            { // "Atras"
-                return;
+            if (choice == 0)
+            { // "Materias"
+                vistaListadoDeMaterias();
             }
             if (choice == 1)
             { // "Estudiantes"
                 vistaListadoDeEstudiantes();
             }
-            break;
+            if (choice == cantOpciones - 1)
+            { // "Salir"
+                int opcionSalir = menu2Opciones(7, "Salir del programa?", "Si, salir", "No, volver al menu");
+                if (opcionSalir == 0)
+                {
+                    endwin();
+                    return;
+                }
+                else
+                    break;
+            }
         }
     }
 }
 
+// vistas estudiantes
 void vistaListadoDeEstudiantes()
 {
 
@@ -368,8 +301,8 @@ void vistaDetalleEstudiante(Estudiante *estudiante)
             }
             else if (opcion == 2)
             { // "Eliminar Estudiante"
-                 int opcionEliminar = menu2Opciones(10, "Confirma la baja de la inscripcion?", "Si, eliminar", "No, cancelar");
-                //Borra mensaje
+                int opcionEliminar = menu2Opciones(10, "Confirma la baja del estudiante?", "Si, eliminar", "No, cancelar");
+                // Borra mensaje
                 move(10, 0);
                 clrtoeol();
                 move(11, 0);
@@ -509,7 +442,7 @@ void vistaListadoMateriasPorEstudiante(Estudiante *estudiante)
                 break;
             case 1:
                 int opcionEliminar = menu2Opciones(cantidadMaterias + 10, "Confirma la baja de la inscripcion?", "Si, eliminar", "No, cancelar");
-                //Borra mensaje
+                // Borra mensaje
                 move(cantidadMaterias + 10, 0);
                 clrtoeol();
                 move(cantidadMaterias + 11, 0);
@@ -647,6 +580,342 @@ void vistaModificarEstudiante(Estudiante *estudiante)
     }
 }
 
+// vistas materias
+void vistaListadoDeMaterias()
+{
+
+    int choice = 0;
+    int ch;
+
+    Materia *seleccion = malloc(sizeof(Materia));
+
+    while (1)
+    {
+        clear();
+        mvprintw(0, 0, "MATERIAS DISPONIBLES - Presione Enter para ver aciones");
+
+        Materia *array = listarMaterias();
+        int cantidadMaterias = cantidadDeMaterias();
+
+        for (int i = 0; i < cantidadMaterias; i++)
+        {
+            Materia *opcion = &array[i];
+
+            if (i == choice) // Resaltar opcion si es la seleccionada
+            {
+                attron(A_REVERSE);
+                mvprintw(2 + i, 2, "Nombre: %s ->", opcion->nombre);
+                attroff(A_REVERSE);
+                seleccion = opcion; // Actualizar seleccion
+            }
+            else
+            {
+                mvprintw(2 + i, 2, "Nombre: %s ->", opcion->nombre);
+            }
+        }
+
+        int i = cantidadMaterias;
+
+        if (choice == cantidadMaterias)
+        {
+            attron(A_REVERSE);
+            mvprintw(3 + i, 1, "%s", "Dar de alta nueva materia->");
+            attroff(A_REVERSE);
+        }
+        else
+            mvprintw(3 + i, 1, "%s", "Dar de alta nueva materia->");
+
+        if (choice == cantidadMaterias + 1)
+        {
+            attron(A_REVERSE);
+            mvprintw(4 + i, 1, "%s", "<- Atras");
+            attroff(A_REVERSE);
+        }
+        else
+            mvprintw(4 + i, 1, "%s", "<- Atras");
+
+        ch = getch();
+        switch (ch)
+        {
+        case KEY_UP:
+            choice--;
+            if (choice < 0)
+                choice = cantidadMaterias - 1;
+            break;
+        case KEY_DOWN:
+            choice++;
+            if (choice >= cantidadMaterias + 2)
+                choice = 0;
+            break;
+        case 10: // Enter
+            if (choice == cantidadMaterias)
+            {
+                vistaNuevaMateria(); // Dar de alta nueva materia
+                break;
+            }
+
+            if (choice == cantidadMaterias + 1)
+                return;
+
+            // Si no es una de las dos opciones, se muestra el detalle de la materia seleccionada
+            vistaDetalleMateria(seleccion);
+
+            break;
+        }
+    }
+
+    endwin(); // Restaurar terminal
+    return;
+}
+
+void vistaNuevaMateria()
+{
+    char nombre[50];
+    char *nombreString = malloc(50 * sizeof(char));
+
+    clear();
+    echo();
+    mvprintw(0, 0, "NUEVA MATERIA");
+    mvprintw(2, 0, "Ingrese el nombre de la materia (max. 50 caracteres): ");
+    getstr(nombre);
+    noecho();
+
+    strcpy(nombreString, nombre);
+
+    altaMateria(nombreString);
+    return;
+}
+
+void vistaDetalleMateria(Materia *materia)
+{
+    int opcion = 0;
+    while (1)
+    {
+        clear();
+        mvprintw(0, 0, "MATERIA %s", materia->nombre);
+
+        mvprintw(2, 1, "Acciones:");
+        char *acciones[] = {"Ver y estudiantes inscriptos ->", "Modificar materia ->", "Eliminar materia ->", "<- Atras"};
+        for (int i = 0; i < 4; i++)
+        {
+            int posY = 2 + i;
+            int posX = 1;
+
+            if (i == 3) // Posiciones para opcion "Atras"
+            {
+                posY++;
+            }
+
+            if (i == opcion)
+            {
+                attron(A_REVERSE);
+                mvprintw(posY, posX, "%s", acciones[i]);
+                attroff(A_REVERSE);
+            }
+            else
+                mvprintw(posY, posX, "%s", acciones[i]);
+        }
+
+        int ch = getch();
+        switch (ch)
+        {
+        case KEY_DOWN:
+            opcion++;
+            if (opcion > 3)
+                opcion = 0;
+            break;
+        case KEY_UP:
+            opcion--;
+            if (opcion < 0)
+                opcion = 0;
+            break;
+        case 10: // Enter
+            if (opcion == 0)
+            { // "Ver y Calificar materias"
+                vistaListadoEstudiantesPorMateria(materia);
+            }
+            else if (opcion == 1)
+            { // "Modificar materia"
+                vistaModificarMateria(materia);
+            }
+            else if (opcion == 2)
+            { // "Eliminar materia"
+                int opcionEliminar = menu2Opciones(10, "Confirma la baja de la materia?", "Si, eliminar", "No, cancelar");
+                // Borra mensaje
+                move(10, 0);
+                clrtoeol();
+                move(11, 0);
+                clrtoeol();
+                move(12, 0);
+                clrtoeol();
+                if (opcionEliminar == 0) // Si confirma la eliminacion
+                {
+                    eliminarMateria(materia->nombre);
+                    mvprintw(11, 2, "Materia dada de baja. - Presione alguna tecla para continuar...");
+                    getch(); // Esperar tecla para continuar
+                    return;
+                }
+            }
+            else if (opcion == 3)
+            { // "<- Atras"
+                return;
+            }
+            break;
+        }
+    }
+}
+
+void vistaListadoEstudiantesPorMateria(Materia *materia)
+{
+
+    int choice = 0;
+    int ch;
+
+    int seleccionNota = 0; // Variable para almacenar la nota seleccionada
+
+    while (1)
+    {
+        clear();
+        mvprintw(0, 0, "ESTUDIANTES INSCRIPTOS - %s", materia->nombre);
+
+        Inscripcion *array = listarEstudiantesPorMateria(materia->nombre);
+        int cantidadEstudiantes = cantidadDeEstudiantesListados();
+
+        for (int i = 0; i < cantidadEstudiantes; i++)
+        {
+            Inscripcion *opcion = &array[i];
+
+            if (i == choice) // Resaltar opcion si es la seleccionada
+            {
+                attron(A_REVERSE);
+                if (opcion->nota == 0)
+                    mvprintw(2 + i, 2, "Legajo %d - %s, %s - Nota: N/A", opcion->estudiante->legajo, opcion->estudiante->apellido, opcion->estudiante->nombre);
+                else
+                    mvprintw(2 + i, 2, "Legajo %d - %s, %s - Nota: %d", opcion->estudiante->legajo, opcion->estudiante->apellido, opcion->estudiante->nombre, opcion->nota);
+                attroff(A_REVERSE);
+            }
+            else
+            {
+                if (opcion->nota == 0)
+                    mvprintw(2 + i, 2, "Legajo %d - %s, %s - Nota: N/A", opcion->estudiante->legajo, opcion->estudiante->apellido, opcion->estudiante->nombre);
+                else
+                    mvprintw(2 + i, 2, "Legajo %d - %s, %s - Nota: %d", opcion->estudiante->legajo, opcion->estudiante->apellido, opcion->estudiante->nombre, opcion->nota);
+            }
+        }
+
+        int i = cantidadEstudiantes;
+
+        if (choice == cantidadEstudiantes)
+        {
+            attron(A_REVERSE);
+            mvprintw(3 + i, 1, "%s", "<- Atras");
+            attroff(A_REVERSE);
+        }
+        else
+            mvprintw(3 + i, 1, "%s", "<- Atras");
+
+        ch = getch();
+        switch (ch)
+        {
+        case KEY_UP:
+            choice--;
+            if (choice < 0)
+                choice = cantidadEstudiantes - 1;
+            break;
+        case KEY_DOWN:
+            choice++;
+            if (choice >= cantidadEstudiantes + 1)
+                choice = 0;
+            break;
+        case 10: // Enter
+            if (choice == cantidadEstudiantes)
+            {
+                return; // Volver al menu anterior
+            }
+        }
+    }
+}
+
+void vistaModificarMateria(Materia *materia)
+{
+    int ch = 0;
+    int choice = 0;
+
+    char *acciones[] = {"<-Confirmar y volver", "<- Atras"};
+
+    char *nuevoNombre = malloc(50 * sizeof(char));
+    strcpy(nuevoNombre, materia->nombre);
+
+    while (1)
+    {
+        clear();
+        int initPosY = 1;
+        int posY = initPosY;
+
+        // Opcion nombre
+        mvprintw(posY, 1, "Nombre: ");
+        if (choice == 0)
+        {
+            attron(A_REVERSE); // Resaltar opcion seleccionada
+            mvprintw(posY, 12, "%s", nuevoNombre);
+            attroff(A_REVERSE);
+        }
+        else
+        {
+            mvprintw(posY, 12, "%s", nuevoNombre);
+        }
+        posY++;
+
+        // Opciones de confirmacion y atras
+        for (int i = 0; i < 2; i++)
+        {
+            posY++;
+            if (i == choice - 1) // Ajustar el índice para las opciones de confirmación y atrás
+            {
+                attron(A_REVERSE); // Resaltar opcion seleccionada
+                mvprintw(posY, 1, "%s", acciones[i]);
+                attroff(A_REVERSE);
+            }
+            else
+            {
+                mvprintw(posY, 1, "%s", acciones[i]);
+            }
+        }
+        ch = getch();
+        switch (ch)
+        {
+        case KEY_DOWN:
+            choice++;
+            if (choice > 2)
+                choice = 0;
+            break;
+        case KEY_UP:
+            choice--;
+            if (choice < 0)
+                choice = 2;
+            break;
+        case 10:
+            if (choice == 0) // Modificar nombre
+            {
+                char input[50];
+                echo();
+                mvscanw(initPosY + choice, 12, "%49s", input);
+                noecho();
+                strcpy(nuevoNombre, input); // Actualizar el dato en pantalla
+            }
+            else if (choice == 1) // Confirmar y volver
+            {
+                modificarMateria(materia->nombre, nuevoNombre);
+                return;
+            }
+            else if (choice == 2) // Atras
+                return;
+            break; // Retorna la opción seleccionada
+        }
+    }
+}
+
+// funciones auxiliares
 int menu2Opciones(int opcionPosY, char *titulo, char *opcion1, char *opcion2)
 {
     int ch = 0;
@@ -727,68 +996,4 @@ int menu3Opciones(int opcionPosY, char *titulo, char *opcion1, char *opcion2, ch
             return opcion; // Retorna la opción seleccionada
         }
     }
-}
-
-int ejemplo()
-{
-    initscr();            // Iniciar ncurses
-    cbreak();             // Desactivar buffer de línea
-    noecho();             // No mostrar caracteres al escribir
-    keypad(stdscr, TRUE); // Habilitar teclas especiales
-    curs_set(0);          // Ocultar el cursor
-
-    int choice = 0;
-    int ch;
-
-    while (1)
-    {
-        clear();
-        mvprintw(0, 0, "Selecciona un nodo:");
-
-        for (int i = 0; i < NUM_ITEMS; i++)
-        {
-            if (i == choice)
-            {
-                attron(A_REVERSE); // Resaltar selección
-                mvprintw(2 + i, 2, "%s", items[i]);
-                attroff(A_REVERSE);
-            }
-            else
-            {
-                mvprintw(2 + i, 2, "%s", items[i]);
-            }
-        }
-
-        ch = getch();
-        switch (ch)
-        {
-        case KEY_UP:
-            choice--;
-            if (choice < 0)
-                choice = NUM_ITEMS - 1;
-            break;
-        case KEY_DOWN:
-            choice++;
-            if (choice >= NUM_ITEMS)
-                choice = 0;
-            break;
-        case 10: // Enter
-            if (choice == NUM_ITEMS - 1)
-            { // "Salir"
-                endwin();
-                return 0;
-            }
-            else
-            {
-                // Aquí puedes ejecutar una acción sobre el nodo seleccionado
-                mvprintw(10, 2, "Seleccionaste %s", items[choice]);
-                refresh();
-                getch(); // Esperar tecla para continuar
-            }
-            break;
-        }
-    }
-
-    endwin(); // Restaurar terminal
-    return 0;
 }
